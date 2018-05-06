@@ -1,0 +1,18 @@
+<html>
+  <head></head>
+  <body>
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io('http://localhost:3001');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+  socket.on('error', function (err) {
+    console.error('Assuming authentication error:', err)
+  })
+</script>
+  </body>
+</html>
