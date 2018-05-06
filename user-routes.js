@@ -105,11 +105,6 @@ app.post('/users', function(req, res) {
 
   })
   users.push(profile);
-
-  res.status(201).send({
-    id_token: createIdToken(profile),
-    access_token: createAccessToken()
-  });
 });
 
 app.post('/sessions/create', function(req, res) {
