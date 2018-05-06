@@ -3,7 +3,7 @@ var express = require('express'),
     config  = require('./config'),
     jwt     = require('jsonwebtoken');
     mongoose= require('mongoose');
-    user    = require('../models/UserSchema.js');
+    user    = require('./models/user.js');
 var app = module.exports = express.Router();
 var mongoDB = 'mongodb://127.0.0.1/farvaylung';
 
@@ -73,12 +73,37 @@ app.post('/users', function(req, res) {
   if (!userScheme.username || !req.body.password) {
     return res.status(400).send("You must send the username and the password");
   }
-  if (_.find(users, userScheme.userSearch)) {
-   return res.status(400).send("A user with that username already exists");
-  }
+
+  user.find({username: req.body.username}, function (err, users) {
+    console.log(users)
+    if (users.length === 0) {
+      var newUser = new user({
+        username: req.body.username,
+        firstname: 'test',
+        lastname: 'optional',
+        pwHash: req.body.password,
+        pwSalt: 'TBD'
+      })
+      newUser.save();
+      res.status(201).send({
+        id_token: createIdToken(newUser),
+        access_token: createAccessToken()
+      });
+    } else {
+      return res.status(400).send("A user with that username already exists");
+    }
+  })
 
   var profile = _.pick(req.body, userScheme.type, 'password', 'extra');
   profile.id = _.max(users, 'id').id + 1;
+  var newUser = new user({
+    username: req.body.username,
+    firstname: 'test',
+    lastname: 'optional',
+    pwHash: req.body.password,
+    pwSalt: 'TBD'
+
+  })
   users.push(profile);
 
   res.status(201).send({
