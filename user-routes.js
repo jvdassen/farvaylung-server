@@ -1,9 +1,11 @@
 var express = require('express'),
     _       = require('lodash'),
+    jwt     = require('jsonwebtoken'),
+    mongoose= require('mongoose'),
+    bcrypt  = require('bcrypt'),
     config  = require('./config'),
-    jwt     = require('jsonwebtoken');
-    mongoose= require('mongoose');
     user    = require('./models/user.js');
+    
 var app = module.exports = express.Router();
 var mongoDB = 'mongodb://127.0.0.1/farvaylung';
 
@@ -41,7 +43,7 @@ function genJti() {
   let jti = '';
   let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   for (let i = 0; i < 16; i++) {
-      jti += possible.charAt(Math.floor(Math.random() * possible.length));
+    jti += possible.charAt(Math.floor(Math.random() * possible.length));
   }
 
   return jti;
@@ -77,17 +79,21 @@ app.post('/users', function(req, res) {
   user.find({username: req.body.username}, function (err, users) {
     console.log(users)
     if (users.length === 0) {
-      var newUser = new user({
-        username: req.body.username,
-        firstname: 'test',
-        lastname: 'optional',
-        pwHash: req.body.password,
-        pwSalt: 'TBD'
-      })
-      newUser.save();
-      res.status(201).send({
-        id_token: createIdToken(newUser),
-        access_token: createAccessToken()
+      bcrypt.genSalt(10, function(err, salt) {
+        bcrypt.hash(req.body.password, salt, function(err, hash) {
+          var newUser = new user({
+            username: req.body.username,
+            firstname: 'test',
+            lastname: 'optional',
+            pwHash: hash,
+            pwSalt: salt
+          })
+          newUser.save();
+          res.status(201).send({
+            id_token: createIdToken(newUser),
+            access_token: createAccessToken()
+          });
+        });
       });
     } else {
       return res.status(400).send("A user with that username already exists");
