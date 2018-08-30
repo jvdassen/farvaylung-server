@@ -21,8 +21,10 @@
   },
   "homepage": "https://github.com/auth0/in-memory-todo",
   "dependencies": {
+    "axios": "^0.18.0",
     "bcrypt": "^2.0.1",
     "body-parser": "^1.6.5",
+    "chai": "^4.1.2",
     "compression": "^1.0.11",
     "cors": "^2.4.1",
     "dotenv": "^0.4.0",
@@ -34,6 +36,7 @@
     "mongoose": "^5.0.17",
     "morgan": "^1.2.3",
     "ramda": "^0.25.0",
+    "socket.io": "^2.1.1",
     "uuid": "^3.2.1"
   }
 }

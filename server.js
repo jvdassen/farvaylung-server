@@ -6,7 +6,7 @@ var logger          = require('morgan'),
     dotenv          = require('dotenv'),
     bodyParser      = require('body-parser'),
     config          = require('./config');
-    R               = require('Ramda')
+    R               = require('ramda')
 
 var app = express();
 
