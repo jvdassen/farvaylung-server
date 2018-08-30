@@ -34,7 +34,6 @@ describe('Suite of unit tests', function () {
       });
       socket.on('connect', function () {
         socket.user = 'test'
-        console.log('connected to WS')
         done();
       });
       socket.on('disconnect', function () { }) 
@@ -66,9 +65,46 @@ describe('Suite of unit tests', function () {
         user: socket.user
       })
       socket.on('news', function (news) {
-        console.log(news)
+        expect(news.participants).to.have.members([ socket.user ])
         done();
       })
     });
+  });
+
+  describe('Game rooms', function () {
+
+    var gameRoom;
+    beforeEach(function (done) {
+      socket.emit('create', {
+        game: {
+          name: 'test-game2'
+        },
+        user: 'user2'
+      })
+      socket.on('news', function (game) {
+        console.log(game)
+        gameRoom = game;
+        if(Array.isArray(game.participants)) {
+          expect(game.participants).to.have.members([ 'user2' ])
+          done();
+
+        }
+      })
+    });
+    describe('Join game', function () {
+      it('Should be able to join the created game', function (done) {
+        socket.emit('join', {
+          game: {
+            id: gameRoom.id
+          },
+          user: { name: 'test2' }
+        })
+        socket.on('news', function (news) {
+          console.log(news)
+          expect(news).to.have.string('test2')
+          done();
+        })
+      })
+    })
   });
 });
