@@ -1,25 +1,15 @@
 {
-  "name": "in-memory-todo",
-  "version": "0.1.0",
-  "description": "An In memory todo for Logged in and not Logged in users",
+  "name": "farvaylung-server",
+  "version": "0.0.1",
+  "description": "Backend for Farvaylung",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/auth0/nodejs-jwt-authentication-sample.git"
+    "test": "mocha test.js"
   },
   "keywords": [
-    "jwt",
-    "auth0"
   ],
-  "author": "Martin Gontovnikas",
+  "author": "Jan von der Assen",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/auth0/in-memory-todo/issues"
-  },
-  "homepage": "https://github.com/auth0/in-memory-todo",
   "dependencies": {
     "axios": "^0.18.0",
     "bcrypt": "^2.0.1",
