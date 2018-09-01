@@ -87,7 +87,6 @@ describe('Suite of unit tests', function () {
         if(Array.isArray(game.participants)) {
           expect(game.participants).to.have.members([ 'user2' ])
           done();
-
         }
       })
     });
@@ -100,7 +99,6 @@ describe('Suite of unit tests', function () {
           user: { name: 'test2' }
         })
         socket.on('news', function (news) {
-          console.log(news)
           expect(news).to.have.string('test2')
           done();
         })
