@@ -6,15 +6,25 @@ var logger          = require('morgan'),
     dotenv          = require('dotenv'),
     bodyParser      = require('body-parser'),
     config          = require('./config');
-    R               = require('ramda')
+    R               = require('ramda');
+    Lobby = require('./game/lobby.js');
 
 var app = express();
+var port = process.env.PORT || 3001;
+var server = http.createServer(app).listen(port, function (err) {
+  console.log('listening in http://localhost:' + port);
+});
+
+var io = require('socket.io')(server);
+var fs = require('fs');
 
 dotenv.load();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
+app.use(require('./routes/user-routes'));
+app.use(require('./routes/static'));
 
 app.use(function(err, req, res, next) {
   if (err.name === 'StatusError') {
@@ -29,30 +39,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(errorhandler())
 }
 
-app.use(require('./routes/user-routes'));
-app.use(require('./routes/static'));
-
-var port = process.env.PORT || 3001;
-
-var server = http.createServer(app).listen(port, function (err) {
-  console.log('listening in http://localhost:' + port);
-});
-
-
-const io = require('socket.io')(server);
-const fs = require('fs');
-const uuidv4 = require('uuid/v4');
-
-const rooms =[
-  {
-    name: 'defaultroom',
-    id: '123',
-    participants:[
-      { name: 'bot', id: '456' }     
-    ] 
-  }
-]; 
-
+var lobby = new Lobby([]);
 var jwt = require('jsonwebtoken');
 
 io.use(function(socket, next){
@@ -70,63 +57,38 @@ io.use(function(socket, next){
 
 io.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
-  socket.on('join', function (data){
-    console.log('A wants to join game:', data.game)
 
-    var gameToJoin = findById(rooms, data.game.id)
-    if (gameToJoin) {
-      gameToJoin.participants.push(data.user);
-      socket.join(gameToJoin.id)
-      console.log('lobby after joining:', JSON.stringify(rooms))
+  socket.on('join', function (data){
+    var joinedGame = lobby.joinGame(data.game.id, data.user);
+
+    if (joinedGame) {
+      socket.join(joinedGame.id)
+      io.to(joinedGame.id).emit('news', joinedGame.name + ': we have a newbie ' + data.user.name)
     } else {
       socket.emit('news', 'Unable to join:', data.game)
     }
-    io.to(gameToJoin.id).emit('news', gameToJoin.name + ': we have a newbie ' + data.user.name)
+    //joinSocketAndNotify(socket, joinedGame, 'join', joinedGame)
   })
   
   socket.on('create', function (data){
-    console.log('A wants to create game:', data.game)
+    var createdGame = lobby.createNewGame(data.game.name, data.user);
 
-    var gameToCreate = findByName(rooms, data.game.name)
-    if (!gameToCreate) {
-      var newGame = addNewRoom(data.game.name, data.user)
-      socket.join(newGame.id)
-      console.log('lobby after creating', rooms)
-      io.to(newGame.id).emit('news', newGame)
+    /*if (createdGame) {
+      socket.join(createdGame.id)
+      io.to(createdGame.id).emit('news', createdGame)
     } else {
       socket.emit('news', 'Unable to create', data.game)
-    }
+    }*/
+    joinSocketAndNotify(socket, createdGame, 'create', createdGame)
   })
 
-  socket.on('message', function (userMessage) {
-    socket.emit('message', 'Hello from echo bot\nI received your: ' + userMessage);
-  })
 });
 
-function addNewRoom (name, creator) {
-  var newGame = {
-    name: name,
-    id: uuidv4(),
-    participants: [
-      creator
-    ] 
+function joinSocketAndNotify (socket, game, eventType, eventBody) {
+  if(game) {
+    socket.join(game.id)
+    io.to(game.id).emit('news', eventBody)
+  } else {
+    socket.emit('news', `Ùnable to ${eventType} ${eventBody}`)
   }
-  rooms.push(newGame);
-  return newGame;
-} 
-
-function findById (iterateable, id) {
-  return R.find(byId(id))(iterateable); //=> {a: 2}
-}
-
-function findByName (iterateable, name) {
-  return R.find(byName(name))(iterateable); //=> {a: 2}
-}
-
-function byId (id) {
-  return R.propEq('id', id)
-}
-
-function byName (name) {
-  return R.propEq('name', name)
 }
