@@ -82,7 +82,6 @@ describe('Suite of unit tests', function () {
         user: 'user2'
       })
       socket.on('news', function (game) {
-        console.log(game)
         gameRoom = game;
         if(Array.isArray(game.participants)) {
           expect(game.participants).to.have.members([ 'user2' ])
@@ -90,6 +89,7 @@ describe('Suite of unit tests', function () {
         }
       })
     });
+    
     describe('Join game', function () {
       it('Should be able to join the created game', function (done) {
         socket.emit('join', {
