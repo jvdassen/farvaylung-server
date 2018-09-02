@@ -105,4 +105,26 @@ describe('Suite of unit tests', function () {
       })
     })
   });
+  describe('Card Decks and Shuffling', function () {
+    var DeckMap = require('./game/DeckMap');
+
+    it('should not create a deck for empty players', function () {
+      var deck = new DeckMap([]);
+      expect(deck).to.be.null;
+    })
+    it('should create different decks for the correct amount of players', function () {
+      var deck = new DeckMap([ 'player1', 'player2' ]);
+      expect(deck.player1.length).to.equal(deck.player2.length);
+      expect(deck.player1).to.not.deep.equal(deck.player2);
+
+      var deck2 = new DeckMap([ 'playerx', 'playery', 'playerz' ]);
+      expect(deck2.playerx.length).to.equal(deck2.playery.length);
+      expect(deck2.playerx.length).to.equal(deck2.playerz.length);
+      expect(deck2.playery.length).to.equal(deck2.playerz.length);
+
+      expect(deck2.playerx).to.not.deep.equal(deck2.playery);
+      expect(deck2.playerx).to.not.deep.equal(deck2.playerz);
+      expect(deck2.playery).to.not.deep.equal(deck2.playerz);
+    })
+  });
 });
