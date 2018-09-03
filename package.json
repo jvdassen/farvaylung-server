@@ -4,7 +4,8 @@
   "description": "Backend for Farvaylung",
   "main": "server.js",
   "scripts": {
-    "test": "mocha test.js"
+    "test": "mocha test.js",
+    "coverage": "node ./node_modules/nyc/bin/nyc.js mocha test.js"
   },
   "keywords": [],
   "author": "Jan von der Assen",
