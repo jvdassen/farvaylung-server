@@ -67,7 +67,10 @@ const shuffler = R.curry(function(random, list) {
     return result;
 })
 
-function DeckMap (players) {
+function deckFactory (players) {
+  if(players.length < 2) {
+    return new Error('At least two players required to split a deck!')
+  }
   var shuffle = shuffler(Math.random);
   var cardsPerPlayer = defaultDeck.length / players.length;
 
@@ -76,4 +79,4 @@ function DeckMap (players) {
 
   return R.zipObj(players, splitByPlayers);
 }
-module.exports = DeckMap;
+module.exports = deckFactory;
