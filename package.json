@@ -6,8 +6,7 @@
   "scripts": {
     "test": "mocha test.js"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "author": "Jan von der Assen",
   "license": "MIT",
   "dependencies": {
@@ -25,6 +24,7 @@
     "lodash": "^2.4.1",
     "mongoose": "^5.0.17",
     "morgan": "^1.2.3",
+    "nyc": "^13.0.1",
     "ramda": "^0.25.0",
     "socket.io": "^2.1.1",
     "uuid": "^3.2.1"
