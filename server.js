@@ -7,7 +7,7 @@ var logger          = require('morgan'),
     bodyParser      = require('body-parser'),
     config          = require('./config');
     R               = require('ramda');
-    Lobby = require('./game/lobby.js');
+    Lobby = require('./game/Lobby.js');
 
 var app = express();
 var port = process.env.PORT || 3001;

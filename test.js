@@ -2,6 +2,7 @@ var io = require('socket.io-client');
 var assert = require('assert'); 
 var expect = require('chai').expect;
 var axios = require('axios');
+var R = require('ramda');
 
 describe('Suite of unit tests', function () {
   var socket;
@@ -106,18 +107,18 @@ describe('Suite of unit tests', function () {
     })
   });
   describe('Card Decks and Shuffling', function () {
-    var DeckMap = require('./game/DeckMap');
+    var DeckMap = require('./game/DeckFactory');
 
     it('should not create a deck for empty players', function () {
-      var deck = new DeckMap([]);
-      expect(deck).to.be.null;
+      var deck = DeckMap([]);
+      expect(deck).to.be.an('Error');
     })
     it('should create different decks for the correct amount of players', function () {
-      var deck = new DeckMap([ 'player1', 'player2' ]);
+      var deck = DeckMap([ 'player1', 'player2' ]);
       expect(deck.player1.length).to.equal(deck.player2.length);
       expect(deck.player1).to.not.deep.equal(deck.player2);
 
-      var deck2 = new DeckMap([ 'playerx', 'playery', 'playerz' ]);
+      var deck2 = DeckMap([ 'playerx', 'playery', 'playerz' ]);
       expect(deck2.playerx.length).to.equal(deck2.playery.length);
       expect(deck2.playerx.length).to.equal(deck2.playerz.length);
       expect(deck2.playery.length).to.equal(deck2.playerz.length);
@@ -125,6 +126,141 @@ describe('Suite of unit tests', function () {
       expect(deck2.playerx).to.not.deep.equal(deck2.playery);
       expect(deck2.playerx).to.not.deep.equal(deck2.playerz);
       expect(deck2.playery).to.not.deep.equal(deck2.playerz);
+    })
+    it('should create different decks for same players at different times', function () {
+      var deck = new DeckMap([ 'player1', 'player2' ]);
+      expect(deck.player1.length).to.equal(deck.player2.length);
+      expect(deck.player1).to.not.deep.equal(deck.player2);
+
+      var deck2 = new DeckMap([ 'player1', 'player2' ]);
+      expect(deck2.player1.length).to.equal(deck2.player2.length);
+      expect(deck2.player1).to.not.deep.equal(deck2.player2);
+      expect(deck2).to.not.deep.equal(deck);
+      expect(deck.player1).to.not.deep.equal(deck2.player1)
+      expect(deck.player2).to.not.deep.equal(deck2.player2)
+    })
+  });
+  describe('Game', function () {
+    var Game = require('./game/Game');
+
+    it('should construct a game', function () {
+      var game = new Game('game-name', 'player1');
+
+      expect(game.participants).to.contain('player1');
+      expect(game.id).to.not.be.null;
+      expect(game.id).to.be.a('String');
+      expect(game.id.length).to.be.greaterThan(0);
+    })
+
+    it('should add players', function () {
+      var game = new Game('game-name', 'player1');
+      game.addPlayer('player2')
+
+      expect(game.participants).to.contain('player1');
+      expect(game.participants).to.contain('player2');
+      expect(game.participants.length).to.be.equal(2);
+    })
+    it('should not add empty players', function () {
+      var game = new Game('game-name', 'player1');
+      game.addPlayer('')
+      game.addPlayer(null)
+      game.addPlayer(undefined)
+      game.addPlayer([])
+
+      expect(game.participants.length).to.be.equal(1);
+    })
+    it('should correctly initialize a deck', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+
+      expect(game.participants.length).to.be.equal(2);
+      expect(game.started).to.be.true;
+      expect(R.keys(game.playerDecks).length).to.be.equal(game.participants.length);
+      expect(game.playerDecks.player1.length).to.be.equal(game.playerDecks.player2.length);
+      expect(game.playersTurn).to.be.equal(creator);
+
+    })
+    it('should correctly attribute played cards to winners', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+      game.playedCards = [
+        { challenging: true, level: 'ace', suit: 'bells' },
+        { challenging: false, level: 'four', suit: 'bells' }
+      ]
+      game.givePlayerPlayedDeck('player2');
+
+      expect(game.playerDecks.player2.length).to.be.equal(game.playerDecks.player1.length + 2)
+      expect(game.playedCards).to.be.deep.equal([]);
+      expect(game.playerDecks.player2[0]).to.be.deep.equal({ challenging: false, level: 'four', suit: 'bells' })
+      expect(game.playerDecks.player2[1]).to.be.deep.equal({ challenging: true, level: 'ace', suit: 'bells' })
+    });
+    it('should correctly add stolen cards', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+      game.playedCards = [
+        { challenging: true, level: 'ace', suit: 'bells' },
+        { challenging: true, level: 'ace', suit: 'acorns' },
+      ]
+      var successFullyStolen = game.stealDeck('player2');
+
+      expect(successFullyStolen).to.be.true;
+      expect(game.playerDecks.player2.length).to.be.equal(game.playerDecks.player1.length + 2)
+      expect(game.playedCards).to.be.deep.equal([]);
+      expect(game.playerDecks.player2[0]).to.be.deep.equal({ challenging: true, level: 'ace', suit: 'acorns' })
+      expect(game.playerDecks.player2[1]).to.be.deep.equal({ challenging: true, level: 'ace', suit: 'bells' })
+    })
+    it('should not add stolen cards if types dont match', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+      game.playedCards = [
+        { challenging: true, level: 'ace', suit: 'bells' },
+        { challenging: true, level: 'king', suit: 'acorns' },
+      ]
+      var successFullyStolen = game.stealDeck('player2');
+
+      expect(successFullyStolen).to.be.false;
+      expect(game.playerDecks.player2.length).to.be.equal(game.playerDecks.player1.length)
+      expect(game.playedCards).to.be.deep.equal([
+        { challenging: true, level: 'ace', suit: 'bells' },
+        { challenging: true, level: 'king', suit: 'acorns' },
+      ]);
+    })
+    it('should not allow users adding cards if its not their turn', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+
+      var successFullyAddedCard = game.playCard(game.playerDecks.player2[0], 'player2')
+      
+      expect(successFullyAddedCard).to.be.false;
+      expect(game.playersTurn).to.be.equal('player1');
+      expect(game.playedCards).to.be.deep.equal([]);
+    })
+    it('should accept non-challenging cards without state changes', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+
+      var successFullyAddedCard = game.playCard({ challenging: false, level: 'ten', suit: 'bells' } , 'player1')
+
+      expect(successFullyAddedCard).to.be.true;
+      expect(game.playersTurn).to.be.equal('player2');
+
+      var successFullyReaddedCard = game.playCard({ challenging: false, level: 'ten', suit: 'bells' } , 'player1')
+
+      expect(successFullyReaddedCard).to.be.false;
+      expect(game.playersTurn).to.be.equal('player2');
+
     })
   });
 });
