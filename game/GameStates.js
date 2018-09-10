@@ -20,7 +20,16 @@ function ChallengedState (game) {
   this.game = game;
 
   this.handleCard = function (card, player) {
-    
+    if(card.challenging) {
+      this.game.setNextPlayer(player);
+      this.game.challenger = player;
+      this.game.challengeTurnsRemaining = levelToTrys(card.level);
+      this.game.gameState = new ChallengedState(this.game);
+      return true;
+    } else {
+
+    }
+     
   }
 }
 
