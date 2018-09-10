@@ -195,8 +195,12 @@ describe('Suite of unit tests', function () {
 
       expect(game.playerDecks.player2.length).to.be.equal(game.playerDecks.player1.length + 2)
       expect(game.playedCards).to.be.deep.equal([]);
-      expect(game.playerDecks.player2[0]).to.be.deep.equal({ challenging: false, level: 'four', suit: 'bells' })
-      expect(game.playerDecks.player2[1]).to.be.deep.equal({ challenging: true, level: 'ace', suit: 'bells' })
+      expect(game.playerDecks.player2[0]).to.be.deep.equal({
+        challenging: false, level: 'four', suit: 'bells'
+      })
+      expect(game.playerDecks.player2[1]).to.be.deep.equal({
+        challenging: true, level: 'ace', suit: 'bells'
+      })
     });
     it('should correctly add stolen cards', function () {
       var creator = 'player1';
@@ -208,12 +212,18 @@ describe('Suite of unit tests', function () {
         { challenging: true, level: 'ace', suit: 'acorns' },
       ]
       var successFullyStolen = game.stealDeck('player2');
+      var firstPlayersDeck = game.playerDecks.player1;
+      var secondPlayersDeck = game.playerDecks.player2;
 
       expect(successFullyStolen).to.be.true;
-      expect(game.playerDecks.player2.length).to.be.equal(game.playerDecks.player1.length + 2)
+      expect(secondPlayersDeck.length).to.be.equal(firstPlayersDeck.length + 2)
       expect(game.playedCards).to.be.deep.equal([]);
-      expect(game.playerDecks.player2[0]).to.be.deep.equal({ challenging: true, level: 'ace', suit: 'acorns' })
-      expect(game.playerDecks.player2[1]).to.be.deep.equal({ challenging: true, level: 'ace', suit: 'bells' })
+      expect(secondPlayersDeck [0]).to.be.deep.equal({
+        challenging: true, level: 'ace', suit: 'acorns' 
+      })
+      expect(secondPlayersDeck [1]).to.be.deep.equal({
+        challenging: true, level: 'ace', suit: 'bells'
+      })
     })
     it('should not add stolen cards if types dont match', function () {
       var creator = 'player1';
