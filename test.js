@@ -243,6 +243,22 @@ describe('Suite of unit tests', function () {
         { challenging: true, level: 'king', suit: 'acorns' },
       ]);
     })
+    it('should not add stolen cards if there are less than two', function () {
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+      game.playedCards = [
+        { challenging: true, level: 'ace', suit: 'bells' }
+      ]
+      var successFullyStolen = game.stealDeck('player2');
+
+      expect(successFullyStolen).to.be.false;
+      expect(game.playerDecks.player2.length).to.be.equal(game.playerDecks.player1.length)
+      expect(game.playedCards).to.be.deep.equal([
+        { challenging: true, level: 'ace', suit: 'bells' },
+      ]);
+    })
     it('should not allow users adding cards if its not their turn', function () {
       var creator = 'player1';
       var game = new Game('game-name', creator);
