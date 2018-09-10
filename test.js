@@ -283,20 +283,30 @@ describe('Suite of unit tests', function () {
       expect(game.playersTurn).to.be.equal('player2');
 
       var successFullyReaddedCard = game.playCard({ challenging: false, level: 'ten', suit: 'bells' } , 'player1')
-      console.log(game.challengeTurnsRemaining, game.challenger)
       expect(game.challengeTurnsRemaining).to.be.null;
       expect(game.challenger).to.be.null;
       expect(successFullyReaddedCard).to.be.false;
       expect(game.playersTurn).to.be.equal('player2');
 
+      var successFullyAddedCard = game.playCard({ challenging: false, level: 'ten', suit: 'bells' } , 'player2')
+      expect(game.challengeTurnsRemaining).to.be.null;
+      expect(game.challenger).to.be.null;
+      expect(successFullyAddedCard).to.be.true;
+      expect(game.playersTurn).to.be.equal('player1');
+      expect(game.playedCards.length).to.be.equal(2);
+      expect(game.playerDecks.player1.length).to.be.equal(game.playerDecks.player2.length)
+      expect(game.playerDecks.player1.length).to.be.equal(23)
+
+
     })
     it('should accept challenging cards correctly if not challenged', function () {
+      var GameStates = require('./game/GameStates');
+
       var creator = 'player1';
       var game = new Game('game-name', creator);
       game.addPlayer('player2');
       game.startGame();
-
-      expect(game.gameState).to.be.an('string')
+      expect(game.gameState instanceof GameStates.UnchallengedState).to.be.true
 
       var successFullyAddedCard = game.playCard({ challenging: true, level: 'ace', suit: 'bells' } , 'player1')
 
@@ -304,11 +314,38 @@ describe('Suite of unit tests', function () {
       expect(game.playersTurn).to.be.equal('player2');
       expect(game.challenger).to.be.equal('player1');
       expect(game.challengeTurnsRemaining).to.be.equal(4)
+      expect(game.gameState instanceof GameStates.ChallengedState).to.be.true
+
 
       var successFullyReaddedCard = game.playCard({ challenging: false, level: 'ace', suit: 'bells' } , 'player1')
 
       expect(successFullyReaddedCard).to.be.false;
       expect(game.playersTurn).to.be.equal('player2');
+    })
+    it('should accept challenging cards correctly if already challenged', function () {
+      var GameStates = require('./game/GameStates');
+
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+      expect(game.gameState instanceof GameStates.UnchallengedState).to.be.true
+
+      var successFullyAddedCard = game.playCard({ challenging: true, level: 'ace', suit: 'bells' } , 'player1')
+
+      expect(successFullyAddedCard).to.be.true;
+      expect(game.playersTurn).to.be.equal('player2');
+      expect(game.challenger).to.be.equal('player1');
+      expect(game.challengeTurnsRemaining).to.be.equal(4)
+      expect(game.gameState instanceof GameStates.ChallengedState).to.be.true
+
+
+      var successFullyReChallenged = game.playCard({ challenging: true, level: 'king', suit: 'bells' } , 'player2')
+
+      expect(successFullyReChallenged).to.be.true;
+      expect(game.playersTurn).to.be.equal('player1');
+      expect(game.challengeTurnsRemaining).to.be.equal(3);
+      expect(game.challenger).to.be.equal('player2')
     })
   });
 });
