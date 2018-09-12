@@ -75,6 +75,21 @@ function Game (name, creator) {
     this.playerDecks[player] = R.reverse(this.playedCards).concat(playersDeck);
     this.playedCards = []
   }
+  this.deductChallengeTry = function () {
+    var anotherTryPossible = this.challengeTurnsRemaining > 0;
+    if(anotherTryPossible) {
+      this.challengeTurnsRemaining--;
+    } else {
+      this.playerWonDeck(this.challenger);
+    }
+  }
+  this.playerWonDeck = function handleWind (winner) {
+    this.givePlayerPlayedDeck(winner)
+    this.challenger = null;
+    this.challengeTurnsRemaining = null;
+    this.playersTurn = winner;
+    this.gameState = new UnchallengedState(this);
+  }
 }
 
 module.exports = Game;
