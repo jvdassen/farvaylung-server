@@ -27,9 +27,9 @@ function ChallengedState (game) {
       this.game.gameState = new ChallengedState(this.game);
       return true;
     } else {
-
+      this.game.deductChallengeTry();
+      return true;
     }
-     
   }
 }
 

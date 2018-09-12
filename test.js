@@ -347,5 +347,86 @@ describe('Suite of unit tests', function () {
       expect(game.challengeTurnsRemaining).to.be.equal(3);
       expect(game.challenger).to.be.equal('player2')
     })
+    it('should accept unchallenging cards correctly if already challenged', function () {
+      var GameStates = require('./game/GameStates');
+
+      var creator = 'player1';
+      var game = new Game('game-name', creator);
+      game.addPlayer('player2');
+      game.startGame();
+      expect(game.gameState instanceof GameStates.UnchallengedState).to.be.true
+
+      var initialChallengerDeck = game.playerDecks.player1;
+      var successFullyAddedCard = game.playCard({ challenging: true, level: 'ober', suit: 'bells' } , 'player1')
+      
+
+      expect(successFullyAddedCard).to.be.true;
+      expect(game.playersTurn).to.be.equal('player2');
+      expect(game.challenger).to.be.equal('player1');
+      expect(game.challengeTurnsRemaining).to.be.equal(2)
+      expect(game.playedCards.length).to.be.equal(1)
+      expect(game.gameState instanceof GameStates.ChallengedState).to.be.true
+
+
+      var playedUnchallenging = game.playCard({ challenging: false, level: 'ten', suit: 'acorns' } , 'player2')
+
+      expect(playedUnchallenging).to.be.true;
+      expect(game.playersTurn).to.be.equal('player2');
+      expect(game.challenger).to.be.equal('player1');
+      expect(game.playedCards.length).to.be.equal(2)
+      expect(game.challengeTurnsRemaining).to.be.equal(1);
+      expect(game.gameState instanceof GameStates.ChallengedState).to.be.true
+
+
+      var playedAnotherUnchallenging = game.playCard({ challenging: false, level: 'ten', suit: 'shields' } , 'player2')
+
+      expect(playedUnchallenging).to.be.true;
+      expect(game.playersTurn).to.be.equal('player2');
+      expect(game.challenger).to.be.equal('player1')
+      expect(game.playedCards.length).to.be.equal(3)
+      expect(game.challengeTurnsRemaining).to.be.equal(0);
+      expect(game.gameState instanceof GameStates.ChallengedState).to.be.true
+
+      var playedCardsBeforeWinning = game.playedCards.length;
+      var deckBeforeWinning = game.playedCards;
+      var playedFinalUnchallenging = game.playCard({ challenging: false, level: 'ten', suit: 'bells' } , 'player2')
+
+      expect(playedFinalUnchallenging).to.be.true;
+      expect(game.playersTurn).to.be.equal('player1');
+      expect(game.playedCards.length).to.be.equal(0)
+      expect(game.playerDecks.player1.length).to.be.equal(initialChallengerDeck.length + playedCardsBeforeWinning + 1)
+      expect(game.challenger).to.be.null;
+      expect(game.challengeTurnsRemaining).to.be.null;
+      expect(game.gameState instanceof GameStates.UnchallengedState).to.be.true
+
+      
+      expect(deckBeforeWinning[3]).to.be.equal(game.playerDecks.player1[0])
+      expect(deckBeforeWinning[2]).to.be.equal(game.playerDecks.player1[1])
+      expect(deckBeforeWinning[1]).to.be.equal(game.playerDecks.player1[2])
+      expect(deckBeforeWinning[0]).to.be.equal(game.playerDecks.player1[3])
+      expect(initialChallengerDeck[0]).to.be.equal(game.playerDecks.player1[4])
+      expect(initialChallengerDeck[1]).to.be.equal(game.playerDecks.player1[5])
+      expect(initialChallengerDeck[2]).to.be.equal(game.playerDecks.player1[6])
+      expect(initialChallengerDeck[3]).to.be.equal(game.playerDecks.player1[7])
+      expect(initialChallengerDeck[4]).to.be.equal(game.playerDecks.player1[8])
+      expect(initialChallengerDeck[5]).to.be.equal(game.playerDecks.player1[9])
+      expect(initialChallengerDeck[6]).to.be.equal(game.playerDecks.player1[10])
+      expect(initialChallengerDeck[7]).to.be.equal(game.playerDecks.player1[11])
+      expect(initialChallengerDeck[8]).to.be.equal(game.playerDecks.player1[12])
+      expect(initialChallengerDeck[9]).to.be.equal(game.playerDecks.player1[13])
+      expect(initialChallengerDeck[10]).to.be.equal(game.playerDecks.player1[14])
+      expect(initialChallengerDeck[11]).to.be.equal(game.playerDecks.player1[15])
+      expect(initialChallengerDeck[12]).to.be.equal(game.playerDecks.player1[16])
+      expect(initialChallengerDeck[13]).to.be.equal(game.playerDecks.player1[17])
+      expect(initialChallengerDeck[14]).to.be.equal(game.playerDecks.player1[18])
+      expect(initialChallengerDeck[15]).to.be.equal(game.playerDecks.player1[19])
+      expect(initialChallengerDeck[16]).to.be.equal(game.playerDecks.player1[20])
+      expect(initialChallengerDeck[17]).to.be.equal(game.playerDecks.player1[21])
+      expect(initialChallengerDeck[18]).to.be.equal(game.playerDecks.player1[22])
+      expect(initialChallengerDeck[19]).to.be.equal(game.playerDecks.player1[23])
+      expect(initialChallengerDeck[20]).to.be.equal(game.playerDecks.player1[24])
+      expect(initialChallengerDeck[21]).to.be.equal(game.playerDecks.player1[25])
+      expect(initialChallengerDeck[22]).to.be.equal(game.playerDecks.player1[26])
+    })
   });
 });
