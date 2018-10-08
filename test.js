@@ -427,6 +427,9 @@ describe('Suite of unit tests', function () {
       expect(initialChallengerDeck[20]).to.be.equal(game.playerDecks.player1[24])
       expect(initialChallengerDeck[21]).to.be.equal(game.playerDecks.player1[25])
       expect(initialChallengerDeck[22]).to.be.equal(game.playerDecks.player1[26])
+
+      var reChallenged = game.playCard({ challenging: true, level: 'ten', suit: 'bells' } , 'player1')
+      expect(game.gameState instanceof GameStates.ChallengedState).to.be.true
     })
   });
 });
