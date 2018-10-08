@@ -1,6 +1,6 @@
-var UnchallengedState = require('./GameStates.js').UnchallengedState;
-var ChallengedState = require('./GameStates.js').ChallengedState;
-var DeckMap = require('./DeckFactory.js');
+var UnchallengedState = require('./GameStates').UnchallengedState;
+var DeckMap = require('./DeckFactory');
+var Observer = require('./Observer');
 var uuidv4 = require('uuid/v4');
 var R = require('ramda');
 
@@ -18,6 +18,8 @@ function Game (name, creator) {
   this.playersTurn = null;
   this.challenger = null;
   this.challengeTurnsRemaining = null;
+  
+  this.stateObserver = new Observer();
 
   this.startGame = function () {
     this.gameState = new UnchallengedState(this);
@@ -67,6 +69,17 @@ function Game (name, creator) {
     if(R.equals(lastLevel, secondLastLevel)) {
       // TODO find the corresponding players stack and prepend layed cards.
       this.givePlayerPlayedDeck(player)
+
+      this.stateObserver.inform({
+        event: 'steal',
+        winner: player,
+        playedCards: this.playedCards,
+        playerDecks: this.playerDecks,
+        playersTurn: this.playersTurn,
+        challengeTurnsRemaining: this.challengeTurnsRemaining,
+        challenger: this.challenger
+      })
+
       return true;
     } return false;
   }
@@ -79,6 +92,15 @@ function Game (name, creator) {
     var anotherTryPossible = this.challengeTurnsRemaining > 0;
     if(anotherTryPossible) {
       this.challengeTurnsRemaining--;
+      // refactor into higher abstraction level
+      this.stateObserver.inform({
+        event: 'try',
+        playedCards: this.playedCards,
+        playerDecks: this.playerDecks,
+        playersTurn: this.playersTurn,
+        challengeTurnsRemaining: this.challengeTurnsRemaining,
+        challenger: this.challenger
+      })
     } else {
       this.playerWonDeck(this.challenger);
     }
@@ -89,6 +111,19 @@ function Game (name, creator) {
     this.challengeTurnsRemaining = null;
     this.playersTurn = winner;
     this.gameState = new UnchallengedState(this);
+
+    this.stateObserver.inform({
+      event: 'win',
+      winner: winner,
+      playedCards: this.playedCards,
+      playerDecks: this.playerDecks,
+      playersTurn: this.playersTurn,
+      challengeTurnsRemaining: this.challengeTurnsRemaining,
+      challenger: this.challenger
+    })
+  }
+  this.subscribeToGameChanges = function subscribe (subscriber) {
+    this.stateObserver.subscribe(subscriber);
   }
 }
 
