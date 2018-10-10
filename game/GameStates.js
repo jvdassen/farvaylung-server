@@ -1,7 +1,7 @@
 function UnchallengedState (game) {
   this.game = game;
 
-  this.handleCard = function (card, player) {
+  UnchallengedState.prototype.handleCard = function (card, player) {
     if(card.challenging) {
       this.game.setNextPlayer(player);
       this.game.challenger = player;
@@ -19,7 +19,7 @@ function UnchallengedState (game) {
 function ChallengedState (game) {
   this.game = game;
 
-  this.handleCard = function (card, player) {
+  ChallengedState.prototype.handleCard = function (card, player) {
     if(card.challenging) {
       this.game.setNextPlayer(player);
       this.game.challenger = player;
