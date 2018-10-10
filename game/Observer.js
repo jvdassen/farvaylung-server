@@ -6,7 +6,7 @@ function Observer () {
   this.subscribe = function (subscriber) {
     this.subscribers.push(subscriber);
   }
-  this.inform(event) {
+  this.inform = function (event) {
     this.subscribers.forEach(subscriber => subscriber.inform(event));
   }
 }

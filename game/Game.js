@@ -21,7 +21,7 @@ function Game (name, creator) {
   
   this.stateObserver = new Observer();
 
-  this.startGame = function () {
+  Game.prototype.startGame = function () {
     this.gameState = new UnchallengedState(this);
     this.started = true;
     this.playerDecks= DeckMap(this.participants);
@@ -32,13 +32,13 @@ function Game (name, creator) {
     return 'hello!'
   }*/
 
-  this.addPlayer = function (player) {
+  Game.prototype.addPlayer = function (player) {
     if(player && typeof player === 'string') {
       this.participants.push(player);
     }
   }
 
-  this.playCard = function (card, player) {
+  Game.prototype.playCard = function (card, player) {
     if(player !== this.playersTurn) {
       return false;
     }
@@ -48,7 +48,7 @@ function Game (name, creator) {
 
     return this.gameState.handleCard(card, player);
   }
-  this.setNextPlayer = function (lastPlayer) {
+  Game.prototype.setNextPlayer = function (lastPlayer) {
     var index = this.participants.findIndex(player => player === lastPlayer);
     var nextPlayer = index === this.participants.length-1 ? this.participants[0] : this.participants[index + 1];
     if(nextPlayer.length === 0) {
@@ -58,7 +58,7 @@ function Game (name, creator) {
     }
   }
 
-  this.stealDeck = function (player) {
+  Game.prototype.stealDeck = function (player) {
     var nrPlayedCards = this.playedCards.length;
     if(nrPlayedCards < 2) {
       return false
@@ -83,12 +83,12 @@ function Game (name, creator) {
       return true;
     } return false;
   }
-  this.givePlayerPlayedDeck = function (player) {
+  Game.prototype.givePlayerPlayedDeck = function (player) {
     var playersDeck = R.prop(player, this.playerDecks);
     this.playerDecks[player] = R.reverse(this.playedCards).concat(playersDeck);
     this.playedCards = []
   }
-  this.deductChallengeTry = function () {
+  Game.prototype.deductChallengeTry = function () {
     var anotherTryPossible = this.challengeTurnsRemaining > 0;
     if(anotherTryPossible) {
       this.challengeTurnsRemaining--;
@@ -105,7 +105,7 @@ function Game (name, creator) {
       this.playerWonDeck(this.challenger);
     }
   }
-  this.playerWonDeck = function handleWind (winner) {
+  Game.prototype.playerWonDeck = function handleWind (winner) {
     this.givePlayerPlayedDeck(winner)
     this.challenger = null;
     this.challengeTurnsRemaining = null;
@@ -122,7 +122,7 @@ function Game (name, creator) {
       challenger: this.challenger
     })
   }
-  this.subscribeToGameChanges = function subscribe (subscriber) {
+  Game.prototype.subscribeToGameChanges = function subscribe (subscriber) {
     this.stateObserver.subscribe(subscriber);
   }
 }
