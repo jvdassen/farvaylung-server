@@ -4,20 +4,20 @@ var R = require('ramda');
 function Lobby (initialGames) {
   this.games = initialGames || [];
 
-  this.findGameById = function (gameId) {
+  Lobby.prototype.findGameById = function (gameId) {
     return findById(this.games, gameId);
   };
-  this.findGameByName = function (name) {
+  Lobby.prototype.findGameByName = function (name) {
     return findByName(this.games, name);
   };
-  this.joinGame = function (gameId, user) {
+  Lobby.prototype.joinGame = function (gameId, user) {
     var gameToJoin = this.findGameById(gameId);
     if(gameToJoin) {
       gameToJoin.participants.push(user)
       return gameToJoin;
     } return null;
   };
-  this.createNewGame = function (name, user) {
+  Lobby.prototype.createNewGame = function (name, user) {
     var newGame = new Game(name, user);
     if(this.findGameByName(name)) {
       return null
