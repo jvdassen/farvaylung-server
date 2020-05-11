@@ -24,7 +24,7 @@
     "jsonwebtoken": "^7.x.x",
     "lodash": "^4.17.11",
     "mocha": "^5.2.0",
-    "mongoose": "^5.0.17",
+    "mongoose": "^5.7.5",
     "morgan": "^1.2.3",
     "nyc": "^13.3.0",
     "ramda": "^0.25.0",
