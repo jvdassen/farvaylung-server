@@ -40,9 +40,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 var lobby = new Lobby([]);
+var games = {
+  'ID-123456': {}
+}
 var jwt = require('jsonwebtoken');
 
-io.use(function(socket, next){
+io.use(function(socket, next) {
   if (socket.handshake.query && socket.handshake.query.token){
     jwt.verify(socket.handshake.query.token, config.secret, function(err, decoded) {
       if(err) return next(new Error('Authentication error'));
@@ -52,13 +55,13 @@ io.use(function(socket, next){
     });
   } else {
       next(new Error('Authentication error'));
-  }    
+  }
 })
 
 io.on('connection', function (socket) {
   socket.emit('news', { hello: 'world' });
 
-  socket.on('join', function (data){
+  socket.on('join', function (data) {
     var joinedGame = lobby.joinGame(data.game.id, data.user);
 
     if (joinedGame) {
@@ -69,19 +72,22 @@ io.on('connection', function (socket) {
     }
     //joinSocketAndNotify(socket, joinedGame, 'join', joinedGame)
   })
-  
-  socket.on('create', function (data){
-    var createdGame = lobby.createNewGame(data.game.name, data.user);
 
-    /*if (createdGame) {
-      socket.join(createdGame.id)
-      io.to(createdGame.id).emit('news', createdGame)
-    } else {
-      socket.emit('news', 'Unable to create', data.game)
-    }*/
+  socket.on('create', function (data) {
+    var createdGame = lobby.createNewGame(data.game.name, data.user)
     joinSocketAndNotify(socket, createdGame, 'create', createdGame)
+    games[createdGame.id] = createdGame
   })
 
+  socket.on('start', function (data) {
+    var gameIDToStart = data.user
+    var user = data.game.id
+    var gameToStart = games[gameIDToStart]
+    gameToStart.startGame()
+
+    var eventUpdate = gameUpdate("gamestart", game.id, game.getCurrentState(),`${user} has started the game (${gameIDToStart})`)
+    io.to(game.id).emit('news', eventUpdate)
+  })
 });
 
 function joinSocketAndNotify (socket, game, eventType, eventBody) {
@@ -90,5 +96,14 @@ function joinSocketAndNotify (socket, game, eventType, eventBody) {
     io.to(game.id).emit('news', eventBody)
   } else {
     socket.emit('news', `Ùnable to ${eventType} ${eventBody}`)
+  }
+}
+
+function gameUpdate(type, game, payload, humanReadble="-") {
+  return {
+    type: type,
+    game: game,
+    payload: payload,
+    humanReadble: humanReadble
   }
 }

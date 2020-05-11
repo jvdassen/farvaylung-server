@@ -21,7 +21,7 @@
     "errorhandler": "^1.1.1",
     "express": "^4.8.5",
     "express-jwt": "^5.3.1",
-    "jsonwebtoken": "^8.5.0",
+    "jsonwebtoken": "^7.x.x",
     "lodash": "^4.17.11",
     "mocha": "^5.2.0",
     "mongoose": "^5.0.17",

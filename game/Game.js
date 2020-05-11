@@ -18,8 +18,22 @@ function Game (name, creator) {
   this.playersTurn = null;
   this.challenger = null;
   this.challengeTurnsRemaining = null;
-  
+
   this.stateObserver = new Observer();
+  Game.prototype.getCurrentState = function () {
+    return {
+      name: this.name,
+      id: this.id,
+      participants: this.participants,
+      started: this.started,
+      playerDecks: this.playerDecks,
+      playedCards: this.playedCards,
+      gameState: this.gameState,
+      playersTurn: this.playersTurn,
+      challenger: this.challenger,
+      challengeTurnsRemaining: this.challengeTurnsRemaining
+    }
+  }
 
   Game.prototype.startGame = function () {
     this.gameState = new UnchallengedState(this);
